@@ -4,16 +4,12 @@ let app = express();
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/api/request', function (req, res) {
-    res.sendFile(__dirname + '/data.json');
-});
-
 app.get('/*', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(3000, function () {
-    console.log('Example app listening on port localhost:3000!');
+app.listen(8888, function () {
+    console.log('Running...');
 });
 
 module.exports = app;
