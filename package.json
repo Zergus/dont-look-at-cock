@@ -1,23 +1,27 @@
 {
-  "name": "aframe-hello-world-boilerplate",
-  "description": "Boilerplate with A-Frame's 'Hello, World!' of WebVR.",
-  "version": "0.3.0",
-  "license": "MIT",
-  "scripts": {
-    "start": "budo --live --verbose --port 3000 --open",
-    "deploy": "ghpages",
-    "ghpages": "ghpages"
+  "name": "dont-look-at-cock",
+  "version": "1.0.0",
+  "description": "dontlookatcock",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.14.0"
   },
-  "devDependencies": {
-    "budo": "^7.0.0",
-    "ghpages": "0.0.3"
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zergus/dont-look-at-cock.git"
   },
   "keywords": [
-    "aframe",
-    "aframe-example",
-    "aframe-boilerplate",
-    "aframe-scene",
-    "webvr",
-    "vr"
-  ]
+    "aframe"
+  ],
+  "author": "SM",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zergus/dont-look-at-cock/issues"
+  },
+  "homepage": "https://github.com/Zergus/dont-look-at-cock#readme"
 }
