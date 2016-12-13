@@ -4,20 +4,30 @@
     <meta charset="utf-8">
     <title>Hello, World! - A-Frame</title>
     <meta name="description" content="Hello, World! - A-Frame">
-    <script src="./vendor/aframe/dist/aframe-master.js"></script>
-    <script src="./vendor/aframe-animation-component/dist/aframe-animation-component.js"></script>
+    <script src="./vendor/aframe.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
   </head>
   <body>
-    <script type="text/javascript" src="./index.js"></script>
-    <a-scene inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js">
-      <a-sphere id="petuh-holder" radius="5" seeker>
-        <a-image src="./images/57ad8f4f484671567df7cdc0.png" position="0 0 -4" id="petuh">
-      </a-sphere>
-      </a-image>
+    <h1 style="position: fixed; left: 10%; top: 0">Score: <span id="score">0</span></h1>
+    <div style="position: fixed; top: 10%; width: 100%; text-align: center">
+      <h1 id="message"></h1>
+    </div>
+    
+    <a-scene id="scene" inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js" ui>
+      <a-assets>
+        <img src="./images/57ad8f4f484671567df7cdc0.png" id="petuh-img">
+        <img src="./images/Target-PNG-Pic.png" id="target-img">
+        <audio src="./sounds/17bf14b1f6ab.mp3" id="game-mus"></audio>
+      </a-assets>
+      <a-entity geometry="primitive: sphere; radius: 5" id="petuh-holder" camera-seeker rotation="0 0 0">
+        <a-box class="collidable" src="#petuh-img" width="2" height="2" depth="0.1" position="0 0 -4" collider-check sound="src: #game-mus; loop: true; on: gameStart"></a-box>
+      </a-entity>
 
-      <a-camera id="player" rotation="0 0 0" user-height="0" target>
-        <a-image src="./images/Target-PNG-Pic.png" position="0 0 -1" transparent="true"></a-image>
-      </a-camera>
+      <a-entity camera look-controls id="player">
+        <a-entity raycaster="objects: .collidable;" position="0 0 0"></a-entity>
+        <a-image src="#target-img" position="0 0 -3"></a-image>
+      </a-entity>
+      
     </a-scene>
   </body>
 </html>
