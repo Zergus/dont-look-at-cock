@@ -6,29 +6,51 @@
     <title>Dont look at cock, World! - A-Frame</title>
     <meta name="description" content="Hello, World! - A-Frame">
     <script src="./vendor/aframe.js"></script>
+    <script src="./vendor/aframe-text-component.js"></script>
+    <script src="./vendor/aframe-textwrap-component.js"></script>
+    <script src="./vendor/aframe-draw-component.js"></script>
     <script type="text/javascript" src="./scripts/index.js"></script>
   </head>
   <body>
-    <h1 style="position: fixed; left: 10%; top: 0">Score: <span id="score">0</span></h1>
-    <div style="position: fixed; top: 10%; width: 100%; text-align: center">
-      <h1 id="message"></h1>
-    </div>
-    
-    <a-scene id="scene" inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js" ui>
-      <a-assets>
+
+    <a-scene stats id="scene" inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js" main-scene>
+
+      <a-assets id="assets" timeout="10000" loading>
+        <audio src="./sounds/17bf14b1f6ab.mp3" id="game-mus"></audio>
         <img src="./images/57ad8f4f484671567df7cdc0.png" id="petuh-img">
         <img src="./images/Target-PNG-Pic.png" id="target-img">
-        <audio src="./sounds/17bf14b1f6ab.mp3" id="game-mus"></audio>
+        <a-mixin id="button" geometry="primitive: box; width: 5; height: 3; depth: 1"></a-mixin>
       </a-assets>
-      <a-entity geometry="primitive: sphere; radius: 5" id="petuh-holder" camera-seeker rotation="0 0 0">
-        <a-box class="collidable" src="#petuh-img" width="2" height="2" depth="0.1" position="0 0 -4" collider-check sound="src: #game-mus; loop: true; on: gameStart"></a-box>
+
+      <a-entity id="menu-scene" position="0 0 -8" menu>
+        <a-entity geometry="primitive: plane; width: 10; height: 10;" material="color: #C7EDFC">
+          <a-entity id="start-game-button" mixin="button" position="0 2 0" material="color: #6883A0" textwrap="textAlign: center; x: 128; y: 128; text: Start game!" class="collidable" hover="#000"></a-entity>
+          <a-entity id="options-game-button" mixin="button" position="0 -2 0" material="color: #57575B"></a-entity>
+        </a-entity>
       </a-entity>
 
+      <a-entity visible="false" id="petuh-scene">
+        <!-- PETUH SPHERE ROTATION -->
+        <a-entity geometry="primitive: sphere; radius: 5" id="petuh-holder" camera-seeker>
+          <!-- PETUH ITSELF -->
+          <a-entity geometry="primitive: box; width: 2; height: 2; depth: 0.1" material="src:#petuh-img" position="0 0 -4">
+            <!-- PETUH SOUND -->
+            <a-sound src="#game-mus" loop="true" on="gameStart">
+            <!-- PETUH COLLIDER -->
+            <a-box width="0.25" height="0.25" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" collider-check></a-box>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+
+      <!-- PLAYER LOOK -->
       <a-entity camera look-controls id="player">
+        <!-- RAYCASTER -->
         <a-entity raycaster="objects: .collidable;" position="0 0 0"></a-entity>
+        <!-- TARGET IMG -->
         <a-image src="#target-img" position="0 0 -3"></a-image>
       </a-entity>
-      
+
     </a-scene>
+
   </body>
 </html>

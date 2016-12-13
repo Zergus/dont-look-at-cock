@@ -1,14 +1,4 @@
 (function () {
-	var activeMessage;
-	function message (text, timer) {
-		window.clearTimeout(activeMessage);
-		var messageEl = document.querySelector('#message');
-		messageEl.innerHTML = text;
-		activeMessage = timer ? setTimeout(function () {
-			messageEl.innerHTML = '';
-		}, timer) : null;
-	}
-
 	const GAME = {
 		status: {
 			0: 'Game Over',
@@ -18,70 +8,134 @@
 	}
 	var duration = 5000;
 	var score = 0;
+    var seekAnim;
 
     AFRAME.registerComponent('collider-check', {
     	dependencies: ['raycaster'],
     	init() {
-    		this.sceneEl = document.querySelector('#scene');
+    		let sceneEl = document.querySelector('#scene');
     		this.el.addEventListener('raycaster-intersected', ()=> {
-      			this.sceneEl.emit('game', { score, status: GAME.status[0] });
+      			sceneEl.emit('game', { score, status: GAME.status[0] });
     		});
     		this.el.addEventListener('raycaster-intersected-cleared', ()=> {
-      			this.sceneEl.emit('game', { score, status: GAME.status[1] });    				
+      			sceneEl.emit('game', { score, status: GAME.status[1] });
     		});
     	}
     });
 
     AFRAME.registerComponent('camera-seeker', {
     	init() {
-    		let el = this.el;
-    		setInterval(() => {
-    			duration = duration > 100 ? duration - 100 : duration;
-    		}, 1000)
-    		this.sceneEl = document.querySelector('#scene');
-			this.CAMERA = document.querySelector('#player');
-    		this.newCords = {};
-    		this.seekAnim = new AFRAME.TWEEN.Tween(this.el.getAttribute('rotation'))
-    			.easing(AFRAME.TWEEN.Easing.Linear.None)
-    			.onUpdate(function () {
-    				el.setAttribute('rotation', { x: this.x, y: this.y, z: this.z });
-    			});
+            this.CAMERA = document.querySelector('#player');
+            this.newCords = {};
+            this.setupAnimation();
     	},
+
+        setupAnimation () {
+            let el = this.el;
+            seekAnim = new AFRAME.TWEEN.Tween(this.el.getAttribute('rotation'))
+                .to(this.newCords, 30000)
+                .easing(AFRAME.TWEEN.Easing.Quadratic.Out)
+                .onUpdate(function () {
+                    el.setAttribute('rotation', `${this.x}, ${this.y}, ${this.z}`);
+                })
+                .repeat(Infinity);
+        },
+
     	tick () {
+            if (!this.el.getAttribute('visible')) return;
+
     		if (AFRAME.utils.coordinates.stringify(this.CAMERA.getAttribute('rotation')) !== AFRAME.utils.coordinates.stringify(this.el.getAttribute('rotation'))) {
-    			this.seekAnim.stop();
-    			this.seekAnim.to(this.CAMERA.getAttribute('rotation'), duration).start();	
+                Object.assign(this.newCords, this.CAMERA.getAttribute('rotation'));
     		}
     	}
     });
 
-    AFRAME.registerComponent('ui', {
+    AFRAME.registerComponent('main-scene', {
     	init () {
-    		this.scoreBlock = document.querySelector('#score');
+
+            var this_ = this;
+            this.el.addEventListener('loaded', function onLoaded () {
+                this_.el.removeEventListener('loaded', onLoaded);
+            });
+
     		this.el.addEventListener('game', ({ detail }) => {
-    			if (detail.status !== this.el.gameStatus) {
-    				this.el.gameStatus = detail.status;
-	    			switch (detail.status) {
-	    				case GAME.status[0]:
-	    					message(`Game over! Your score ${ detail.score}! Move head to start new game!`);
-	    					break;
-						case GAME.status[1]:
-							document.querySelector('[sound]').emit('gameStart');
-							message(`Game STARTED! SURVIVE FROM COCK EYES!`, 3000);
-							duration = 5000;
-	      					score = 0;
-	      					break;
-						default:
-							break;
-	    			}
-    			}
+    			this.onGameStatusUpdate(detail.status);
     		});
     	},
 
+        onGameStatusUpdate (status) {
+            if (!this.el.getAttribute('visible')) return;
+            if (status !== this.el.gameStatus) {
+                this.el.gameStatus = status;
+                switch (status) {
+                    case GAME.status[0]:
+                        this.stopGame();
+                        break;
+                    case GAME.status[1]:
+                        this.startGame();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+
+        stopGame () {
+            seekAnim.stop();
+        },
+
+        startGame () {
+            document.querySelector('[sound]').emit('gameStart');
+            duration = 5000;
+            score = 0;
+            seekAnim.start();
+        },
+
     	tick() {
+            if (!this.el.getAttribute('visible')) return;
+
     		if (this.el.gameStatus === GAME.status[1]) {
-    			this.scoreBlock.innerHTML = score += 1;
+			   score += 1;
     		}
     	}
-    })
+    });
+
+    AFRAME.registerComponent('menu', {
+        init() {
+        }
+    });
+
+    AFRAME.registerComponent('hover', {
+        dependencies: ['raycaster'],
+        schema: {
+            type: 'color',
+        },
+        init() {
+
+            function changeColor (fromColor, toColor) {
+                return new AFRAME.TWEEN.Tween(fromColor).to(toColor).start();
+            }
+
+            var swap = (function (events) {
+                this.el.addEventListener(events[0], swap);
+                this.el.removeEventListener(events[1], swap);
+                events.reverse();
+            }).bind(this, ['raycaster-intersected', 'raycaster-intersected-cleared']);
+
+            swap();
+
+            // var onHover = (function  () {
+            //     this.el.removeEventListener('raycaster-intersected', onHover);
+            //     this.el.addEventListener('raycaster-intersected-cleared', onBlur);
+            // }).bind(this);
+
+            // var onBlur = (function  () {
+            //     this.el.addEventListener('raycaster-intersected', onHover);
+            //     this.el.removeEventListener('raycaster-intersected-cleared', onBlur);
+            // }).bind(this);
+
+            // onBlur();
+        }
+    });
+
 })();
