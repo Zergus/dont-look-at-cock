@@ -25,16 +25,28 @@
 
       <a-entity id="menu-scene" position="0 0 -8" menu visible="true">
         <a-entity geometry="primitive: plane; width: 10; height: 10;" material="color: blue" random-blink="1000">
-          <a-entity id="start-game-button" material="color: #fff" mixin="button" position="0 2 0" class="collidable" hover button="start"></a-entity>
+          <a-entity id="start-game-button"
+            mixin="button"
+            position="0 2 1"
+            class="collidable"
+            hover button="start"
+            draw="background: #D7E8FF" textwrap="textAlign: center; x: 128; y: 128; text: Start Game!">
+          </a-entity>
+          </a-entity>
           <a-entity id="options-game-button" mixin="button" position="0 -2 0" material="color: #57575B" hover button="leaderboard"></a-entity>
         </a-entity>
       </a-entity>
 
       <a-entity visible="false" id="petuh-scene">
         <!-- PETUH SPHERE ROTATION -->
-        <a-entity geometry="primitive: sphere; radius: 5" id="petuh-holder" camera-seeker>
+        <a-entity geometry="primitive: sphere; radius: 7" material="side: double" id="petuh-holder" camera-seeker random-blink="1000">
           <!-- PETUH ITSELF -->
-          <a-entity geometry="primitive: box; width: 2; height: 2; depth: 0.1" material="src:#petuh-img" position="0 0 -4">
+          <a-entity geometry="primitive: box; width: 2; height: 2; depth: 2" material="src:#petuh-img" position="0 0 -5" transparent="true">
+             <a-animation attribute="rotation"
+               dur="10000"
+               fill="forwards"
+               to="0 360 0"
+               repeat="indefinite"></a-animation>
             <!-- PETUH SOUND -->
             <a-sound src="#game-mus" loop="true" on="gameStart">
             <!-- PETUH COLLIDER -->
@@ -50,6 +62,7 @@
         <!-- TARGET IMG -->
         <a-image src="#target-img" position="0 0 -3"></a-image>
       </a-entity>
+      <a-plane height="100" width="100" rotation="-90 0 0" position="0 -6 0" random-blink="1000"></a-plane>
 
     </a-scene>
 

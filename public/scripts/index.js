@@ -7,7 +7,6 @@
             starting: 'Game Starting'
 		}
 	}
-	var duration = 5000;
 	var score = 0;
     var seekAnim;
 
@@ -20,6 +19,16 @@
             })
             .onComplete(function () {
                 times === Infinity && changeColor(el, duration, times);
+            })
+            .start();
+    }
+
+    function pressButton (el, duration) {
+        var this_ = this;
+        return new AFRAME.TWEEN.Tween(el.getAttribute('position'))
+            .to({ z: 0 }, duration)
+            .onUpdate(function () {
+                el.setAttribute('position', `${this.x}, ${this.y}, ${this.z}`);
             })
             .start();
     }
@@ -72,7 +81,7 @@
             let el = this.el;
             var this_ = this;
             seekAnim = new AFRAME.TWEEN.Tween(this.el.getAttribute('rotation'))
-                .to(this.newCords, 30000)
+                .to(this.newCords, 32000)
                 .easing(AFRAME.TWEEN.Easing.Quadratic.Out)
                 .onUpdate(function () {
                     el.setAttribute('rotation', `${this.x}, ${this.y}, ${this.z}`);
@@ -112,7 +121,7 @@
                         break;
                     case GAME.status.start:
                         this.startGame();
-                        break;  
+                        break;
                     case GAME.status.menu:
                         this.stopGameStart();
                         break;
@@ -125,7 +134,7 @@
             }
         },
 
-        timerBeforeStart (time = 3000) {
+        timerBeforeStart (time = 2000) {
             this.timer = setTimeout(() => {
                 updateGameStatus(GAME.status.start);
             }, time)
@@ -143,7 +152,6 @@
         startGame () {
             toggleMenu();
             document.querySelector('[sound]').emit('gameStart');
-            duration = 5000;
             score = 0;
             seekAnim.start();
         },
@@ -185,20 +193,22 @@
         init() {
             changeColor(this.el, this.data, Infinity);
         },
-        
+
     })
     AFRAME.registerComponent('button', {
         schema: {
             type: 'string'
         },
         init () {
+            this.pressAnim = null;
+            this.origPosition_ = AFRAME.utils.coordinates.stringify(this.el.getAttribute('position'));
             this.activeAnimation = null;
             this.el.addEventListener('hover', this.onHover.bind(this));
             this.el.addEventListener('blur', this.onBlur.bind(this));
         },
         onHover () {
             if (isGameStart()) return;
-            changeColor(this.el, 3000);
+            this.pressAnim = pressButton(this.el, 2000);
             switch (this.data) {
                 case 'start':
                     updateGameStatus(GAME.status.starting)
@@ -213,6 +223,8 @@
         onBlur () {
             if (isGameStart()) return;
             updateGameStatus(GAME.status.menu)
+            AFRAME.TWEEN.remove(this.pressAnim);
+            this.el.setAttribute('position', this.origPosition_);
         },
         tick() {
             //
