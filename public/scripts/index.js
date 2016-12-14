@@ -8,6 +8,7 @@
 		}
 	}
 	var score = 0;
+    var duration = 3000;
     var seekAnim;
 
     function changeColor (el, duration = 1000, times) {
@@ -80,26 +81,25 @@
         setupAnimation () {
             let el = this.el;
             var this_ = this;
-            seekAnim = new AFRAME.TWEEN.Tween(this.el.getAttribute('rotation'))
-                .to(this.newCords, 32000)
-                .easing(AFRAME.TWEEN.Easing.Quadratic.Out)
+            return seekAnim = new AFRAME.TWEEN.Tween(document.querySelector('#petuh-holder').getAttribute('rotation'))
+                .to(document.querySelector('#player').getAttribute('rotation'), duration)
+                .easing(AFRAME.TWEEN.Easing.Linear.None)
                 .onUpdate(function () {
                     el.setAttribute('rotation', `${this.x}, ${this.y}, ${this.z}`);
                 })
-                .repeat(Infinity);
+                .onComplete(() => {
+                    if (duration > 400) duration -= 100;
+                    this.setupAnimation().start();
+                });
         },
 
     	tick () {
-            if (!isGameStart()) return;
-    		if (AFRAME.utils.coordinates.stringify(this.CAMERA.getAttribute('rotation')) !== AFRAME.utils.coordinates.stringify(this.el.getAttribute('rotation'))) {
-                Object.assign(this.newCords, this.CAMERA.getAttribute('rotation'));
-    		}
+            //
     	}
     });
 
     AFRAME.registerComponent('main-scene', {
     	init () {
-
             var this_ = this;
             this.timer = null;
             updateGameStatus(GAME.status.menu);
@@ -152,6 +152,7 @@
         startGame () {
             toggleMenu();
             document.querySelector('[sound]').emit('gameStart');
+            duration = 3000;
             score = 0;
             seekAnim.start();
         },
@@ -211,7 +212,7 @@
             this.pressAnim = pressButton(this.el, 2000);
             switch (this.data) {
                 case 'start':
-                    updateGameStatus(GAME.status.starting)
+                    updateGameStatus(GAME.status.starting);
                     break;
                 case 'leaderboard':
                     //
@@ -221,10 +222,10 @@
             }
         },
         onBlur () {
-            if (isGameStart()) return;
-            updateGameStatus(GAME.status.menu)
             AFRAME.TWEEN.remove(this.pressAnim);
             this.el.setAttribute('position', this.origPosition_);
+            if (isGameStart()) return;
+            updateGameStatus(GAME.status.menu)
         },
         tick() {
             //
