@@ -5,6 +5,7 @@
     <link rel="shortcut icon" href="./images/hen_chicken-512.png" type="image/png">
     <title>Dont look at cock, World! - A-Frame</title>
     <meta name="description" content="Hello, World! - A-Frame">
+    <script src="./vendor/chance.min.js"></script>
     <script src="./vendor/aframe.js"></script>
     <script src="./vendor/aframe-text-component.js"></script>
     <script src="./vendor/aframe-textwrap-component.js"></script>
@@ -13,7 +14,7 @@
   </head>
   <body>
 
-    <a-scene stats id="scene" inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js" main-scene>
+    <a-scene stats id="main-scene" inspector="url: https://aframe.io/releases/0.3.0/aframe-inspector.min.js" main-scene>
 
       <a-assets id="assets" timeout="10000" loading>
         <audio src="./sounds/17bf14b1f6ab.mp3" id="game-mus"></audio>
@@ -22,10 +23,10 @@
         <a-mixin id="button" geometry="primitive: box; width: 5; height: 3; depth: 1"></a-mixin>
       </a-assets>
 
-      <a-entity id="menu-scene" position="0 0 -8" menu>
-        <a-entity geometry="primitive: plane; width: 10; height: 10;" material="color: #C7EDFC">
-          <a-entity id="start-game-button" mixin="button" position="0 2 0" material="color: #6883A0" textwrap="textAlign: center; x: 128; y: 128; text: Start game!" class="collidable" hover="#000"></a-entity>
-          <a-entity id="options-game-button" mixin="button" position="0 -2 0" material="color: #57575B"></a-entity>
+      <a-entity id="menu-scene" position="0 0 -8" menu visible="true">
+        <a-entity geometry="primitive: plane; width: 10; height: 10;" material="color: blue" random-blink="1000">
+          <a-entity id="start-game-button" material="color: #fff" mixin="button" position="0 2 0" class="collidable" hover button="start"></a-entity>
+          <a-entity id="options-game-button" mixin="button" position="0 -2 0" material="color: #57575B" hover button="leaderboard"></a-entity>
         </a-entity>
       </a-entity>
 
@@ -37,7 +38,7 @@
             <!-- PETUH SOUND -->
             <a-sound src="#game-mus" loop="true" on="gameStart">
             <!-- PETUH COLLIDER -->
-            <a-box width="0.25" height="0.25" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" collider-check></a-box>
+            <a-box width="0.25" height="0.25" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" hover petuh></a-box>
           </a-entity>
         </a-entity>
       </a-entity>

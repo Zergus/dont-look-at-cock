@@ -1,26 +1,64 @@
 (function () {
 	const GAME = {
 		status: {
-			0: 'Game Over',
-			1: 'Game Started',
-			3: 'Game Inactive'
+			over: 'Game Over',
+			start: 'Game Started',
+			menu: 'Game Menu',
+            starting: 'Game Starting'
 		}
 	}
 	var duration = 5000;
 	var score = 0;
     var seekAnim;
 
-    AFRAME.registerComponent('collider-check', {
-    	dependencies: ['raycaster'],
+    function changeColor (el, duration = 1000, times) {
+        var this_ = this;
+        return new AFRAME.TWEEN.Tween(new AFRAME.THREE.Color(el.getAttribute('material').color))
+            .to(new AFRAME.THREE.Color(chance.color({format: 'shorthex'})), duration)
+            .onUpdate(function () {
+                el.setAttribute('material', { color: `#${this.getHexString()}` });
+            })
+            .onComplete(function () {
+                times === Infinity && changeColor(el, duration, times);
+            })
+            .start();
+    }
+
+    function swapEvents (events) {
+        var swap = (function (events) {
+            this.el.addEventListener(events[0], swap);
+            this.el.removeEventListener(events[1], swap);
+            events.reverse();
+            this.onEvent(events[0]);
+        }).bind(this, ['raycaster-intersected', 'raycaster-intersected-cleared']);
+        swap();
+    }
+
+    function updateGameStatus (status) {
+        document.querySelector('#main-scene').emit('game', { score, status });
+    }
+
+    function toggleMenu () {
+        document.querySelector('#menu-scene').setAttribute('visible', !document.querySelector('#menu-scene').getAttribute('visible'));
+        document.querySelector('#petuh-scene').setAttribute('visible', !document.querySelector('#petuh-scene').getAttribute('visible'));
+    }
+
+    function isGameStart () {
+        return document.querySelector('#main-scene').gameStatus === GAME.status.start;
+    }
+
+    AFRAME.registerComponent('petuh', {
     	init() {
-    		let sceneEl = document.querySelector('#scene');
-    		this.el.addEventListener('raycaster-intersected', ()=> {
-      			sceneEl.emit('game', { score, status: GAME.status[0] });
-    		});
-    		this.el.addEventListener('raycaster-intersected-cleared', ()=> {
-      			sceneEl.emit('game', { score, status: GAME.status[1] });
-    		});
-    	}
+            this.el.addEventListener('hover', this.onHover.bind(this));
+            this.el.addEventListener('blur', this.onBlur.bind(this));
+    	},
+        onHover () {
+            if (!isGameStart()) return;
+            updateGameStatus(GAME.status.stop);
+        },
+        onBlur () {
+            //
+        }
     });
 
     AFRAME.registerComponent('camera-seeker', {
@@ -42,7 +80,7 @@
         },
 
     	tick () {
-            if (!this.el.getAttribute('visible')) return;
+            if (!isGameStart()) return;
 
     		if (AFRAME.utils.coordinates.stringify(this.CAMERA.getAttribute('rotation')) !== AFRAME.utils.coordinates.stringify(this.el.getAttribute('rotation'))) {
                 Object.assign(this.newCords, this.CAMERA.getAttribute('rotation'));
@@ -54,6 +92,8 @@
     	init () {
 
             var this_ = this;
+            this.timer = null;
+            updateGameStatus(GAME.status.menu);
             this.el.addEventListener('loaded', function onLoaded () {
                 this_.el.removeEventListener('loaded', onLoaded);
             });
@@ -64,15 +104,20 @@
     	},
 
         onGameStatusUpdate (status) {
-            if (!this.el.getAttribute('visible')) return;
             if (status !== this.el.gameStatus) {
                 this.el.gameStatus = status;
                 switch (status) {
-                    case GAME.status[0]:
+                    case GAME.status.stop:
                         this.stopGame();
                         break;
-                    case GAME.status[1]:
+                    case GAME.status.start:
                         this.startGame();
+                        break;  
+                    case GAME.status.menu:
+                        this.stopGameStart();
+                        break;
+                    case GAME.status.starting:
+                        this.timerBeforeStart();
                         break;
                     default:
                         break;
@@ -80,11 +125,23 @@
             }
         },
 
+        timerBeforeStart (time = 3000) {
+            this.timer = setTimeout(() => {
+                updateGameStatus(GAME.status.start);
+            }, time)
+        },
+
+        stopGameStart () {
+            window.clearTimeout(this.timer);
+        },
+
         stopGame () {
+            toggleMenu();
             seekAnim.stop();
         },
 
         startGame () {
+            toggleMenu();
             document.querySelector('[sound]').emit('gameStart');
             duration = 5000;
             score = 0;
@@ -92,49 +149,72 @@
         },
 
     	tick() {
-            if (!this.el.getAttribute('visible')) return;
-
-    		if (this.el.gameStatus === GAME.status[1]) {
-			   score += 1;
-    		}
+            //
     	}
     });
 
     AFRAME.registerComponent('menu', {
         init() {
+
         }
     });
 
     AFRAME.registerComponent('hover', {
         dependencies: ['raycaster'],
+        init() {
+            swapEvents.call(this, ['raycaster-intersected', 'raycaster-intersected-cleared']);
+        },
+        onEvent(event) {
+            switch(event) {
+                case 'raycaster-intersected':
+                    this.el.emit('hover');
+                    break;
+                case 'raycaster-intersected-cleared':
+                    this.el.emit('blur');
+                    break;
+                default:
+                    break;
+            }
+        },
+    });
+
+    AFRAME.registerComponent('random-blink', {
         schema: {
-            type: 'color',
+            type: 'int'
         },
         init() {
-
-            function changeColor (fromColor, toColor) {
-                return new AFRAME.TWEEN.Tween(fromColor).to(toColor).start();
+            changeColor(this.el, this.data, Infinity);
+        },
+        
+    })
+    AFRAME.registerComponent('button', {
+        schema: {
+            type: 'string'
+        },
+        init () {
+            this.activeAnimation = null;
+            this.el.addEventListener('hover', this.onHover.bind(this));
+            this.el.addEventListener('blur', this.onBlur.bind(this));
+        },
+        onHover () {
+            if (isGameStart()) return;
+            changeColor(this.el, 3000);
+            switch (this.data) {
+                case 'start':
+                    updateGameStatus(GAME.status.starting)
+                    break;
+                case 'leaderboard':
+                    //
+                    break;
+                default:
+                    break;
             }
-
-            var swap = (function (events) {
-                this.el.addEventListener(events[0], swap);
-                this.el.removeEventListener(events[1], swap);
-                events.reverse();
-            }).bind(this, ['raycaster-intersected', 'raycaster-intersected-cleared']);
-
-            swap();
-
-            // var onHover = (function  () {
-            //     this.el.removeEventListener('raycaster-intersected', onHover);
-            //     this.el.addEventListener('raycaster-intersected-cleared', onBlur);
-            // }).bind(this);
-
-            // var onBlur = (function  () {
-            //     this.el.addEventListener('raycaster-intersected', onHover);
-            //     this.el.removeEventListener('raycaster-intersected-cleared', onBlur);
-            // }).bind(this);
-
-            // onBlur();
+        },
+        onBlur () {
+            updateGameStatus(GAME.status.menu)
+        },
+        tick() {
+            //
         }
     });
 
