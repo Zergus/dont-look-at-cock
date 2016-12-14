@@ -70,6 +70,7 @@
 
         setupAnimation () {
             let el = this.el;
+            var this_ = this;
             seekAnim = new AFRAME.TWEEN.Tween(this.el.getAttribute('rotation'))
                 .to(this.newCords, 30000)
                 .easing(AFRAME.TWEEN.Easing.Quadratic.Out)
@@ -81,7 +82,6 @@
 
     	tick () {
             if (!isGameStart()) return;
-
     		if (AFRAME.utils.coordinates.stringify(this.CAMERA.getAttribute('rotation')) !== AFRAME.utils.coordinates.stringify(this.el.getAttribute('rotation'))) {
                 Object.assign(this.newCords, this.CAMERA.getAttribute('rotation'));
     		}
@@ -211,6 +211,7 @@
             }
         },
         onBlur () {
+            if (isGameStart()) return;
             updateGameStatus(GAME.status.menu)
         },
         tick() {
