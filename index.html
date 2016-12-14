@@ -10,6 +10,8 @@
     <script src="./vendor/aframe-text-component.js"></script>
     <script src="./vendor/aframe-textwrap-component.js"></script>
     <script src="./vendor/aframe-draw-component.js"></script>
+    <script src="./vendor/aframe-gif-component.js"></script>
+    <script src="./vendor/aframe-gif-shader.js"></script>
     <script type="text/javascript" src="./scripts/index.js"></script>
   </head>
   <body>
@@ -18,9 +20,14 @@
 
       <a-assets id="assets" timeout="10000" loading>
         <audio src="./sounds/17bf14b1f6ab.mp3" id="game-mus"></audio>
+        <audio src="./sounds/ef50c5844776135.mp3" id="fire-sound"></audio>
+        <audio src="./sounds/74ebd921c7fa68c.mp3" id="reload-sound"></audio>
         <img src="./images/57ad8f4f484671567df7cdc0.png" id="petuh-img">
         <img src="./images/Target-PNG-Pic.png" id="target-img">
+        <img src="./images/explosion.gif" id="explosion">
         <a-mixin id="button" geometry="primitive: box; width: 5; height: 3; depth: 1"></a-mixin>
+        <a-asset-item id="gunObj" src="./obj/Rail_Beam_Gun/RailBeamGun.obj"></a-asset-item>
+        <a-asset-item id="gunMtl" src="./obj/Rail_Beam_Gun/RailBeamGun.mtl"></a-asset-item>
       </a-assets>
 
       <a-entity id="menu-scene" position="0 0 -8" menu visible="true">
@@ -33,13 +40,16 @@
             draw="background: #D7E8FF" textwrap="textAlign: center; x: 128; y: 128; text: Start Game!">
           </a-entity>
           </a-entity>
-          <a-entity id="options-game-button" mixin="button" position="0 -2 0" material="color: #57575B" hover button="leaderboard"></a-entity>
+          <a-entity geometry="primitive: box; width: 7; height: 3; depth: 0.1" 
+            position="0 -2 1"
+            draw="background: red" 
+            textwrap="textAlign: center; x: 128; y: 100; text: TIP: DONT LOOK AT COCK!"></a-entity>
         </a-entity>
       </a-entity>
 
       <a-entity visible="false" id="petuh-scene">
         <!-- PETUH SPHERE ROTATION -->
-        <a-entity geometry="primitive: sphere; radius: 7" material="side: double" id="petuh-holder" camera-seeker random-blink="1000">
+        <a-entity geometry="primitive: sphere; radius: 7" material="side: double" id="petuh-holder" rotation="0 -90 0" camera-seeker random-blink="1000">
           <!-- PETUH ITSELF -->
           <a-entity geometry="primitive: box; width: 2; height: 2; depth: 2" material="src:#petuh-img" position="0 0 -5" transparent="true">
              <a-animation attribute="rotation"
@@ -48,9 +58,9 @@
                to="0 360 0"
                repeat="indefinite"></a-animation>
             <!-- PETUH SOUND -->
-            <a-sound src="#game-mus" loop="true" on="gameStart">
+            <a-sound id="petuh-song" src="#game-mus" loop="true" on="gameStart"></a-sound>
             <!-- PETUH COLLIDER -->
-            <a-box width="1" height="1" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" hover petuh></a-box>
+            <a-box width="0.5" height="0.5" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" hover petuh></a-box>
           </a-entity>
         </a-entity>
       </a-entity>
@@ -61,6 +71,11 @@
         <a-entity raycaster="objects: .collidable;" position="0 0 0"></a-entity>
         <!-- TARGET IMG -->
         <a-image src="#target-img" position="0 0 -3"></a-image>
+        <a-image id="gun-explosion" src="#explosion" position="0 0 -3"></a-image>
+        <a-entity id="gun" obj-model="obj: #gunObj" material="color: #BCC6CC" scale="0.1, 0.1, 0.1" rotation="0 90 0" position="1.5 -10 1">
+          <a-sound id="fire-from-gun" src="#fire-sound" loop="true"></a-sound>
+          <a-sound id="reload-gun" volume="80" src="#reload-sound"></a-sound>
+        </a-entity>
       </a-entity>
       <a-plane height="100" width="100" rotation="-90 0 0" position="0 -6 0" random-blink="1000"></a-plane>
 

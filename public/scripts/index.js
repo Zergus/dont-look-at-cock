@@ -10,6 +10,7 @@
 	var score = 0;
     var duration = 3000;
     var seekAnim;
+    var shotgun = false;
 
     function changeColor (el, duration = 1000, times) {
         var this_ = this;
@@ -82,15 +83,28 @@
             let el = this.el;
             var this_ = this;
             return seekAnim = new AFRAME.TWEEN.Tween(document.querySelector('#petuh-holder').getAttribute('rotation'))
-                .to(document.querySelector('#player').getAttribute('rotation'), duration)
+                .to(this.getCoords(document.querySelector('#player').getAttribute('rotation')), duration)
                 .easing(AFRAME.TWEEN.Easing.Linear.None)
                 .onUpdate(function () {
                     el.setAttribute('rotation', `${this.x}, ${this.y}, ${this.z}`);
                 })
                 .onComplete(() => {
-                    if (duration > 400) duration -= 100;
+                    if (!shotgun && duration > 300) duration -= 100;
+                    if (shotgun) duration = 300;
                     this.setupAnimation().start();
                 });
+        },
+
+        getCoords(coords) {
+            if (!coords) return null;
+            if (shotgun) {
+                return {
+                    x: chance.floating({min: coords.x - 360, max: coords.x + 360}),
+                    y: chance.floating({min: coords.y - 360, max: coords.y + 360}),
+                    z: chance.floating({min: coords.z - 360, max: coords.z + 360})
+                }
+            }
+            return coords;
         },
 
     	tick () {
@@ -102,6 +116,10 @@
     	init () {
             var this_ = this;
             this.timer = null;
+            this.gunTimer = null;
+            this.getShotgun_ = null;
+            this.startFire_ = null;
+            this.hideShotgun_ = null;
             updateGameStatus(GAME.status.menu);
             this.el.addEventListener('loaded', function onLoaded () {
                 this_.el.removeEventListener('loaded', onLoaded);
@@ -110,6 +128,8 @@
     		this.el.addEventListener('game', ({ detail }) => {
     			this.onGameStatusUpdate(detail.status);
     		});
+            document.querySelector('#gun-explosion').setAttribute('visible', false);
+
     	},
 
         onGameStatusUpdate (status) {
@@ -137,7 +157,13 @@
         timerBeforeStart (time = 2000) {
             this.timer = setTimeout(() => {
                 updateGameStatus(GAME.status.start);
-            }, time)
+            }, time);
+        },
+
+        timerBeforeShotgun (time = 10000) {
+            this.gunTimer = setTimeout(() => {
+                this.getShotgun();
+            }, time); 
         },
 
         stopGameStart () {
@@ -145,16 +171,96 @@
         },
 
         stopGame () {
+            this.gunTimer && window.clearTimeout(this.gunTimer);
+            AFRAME.TWEEN.remove(this.getShotgun_);
+            AFRAME.TWEEN.remove(this.startFire_);
+            AFRAME.TWEEN.remove(this.hideShotgun_);
+            this.hideShotgun();
             toggleMenu();
             seekAnim.stop();
         },
 
         startGame () {
             toggleMenu();
-            document.querySelector('[sound]').emit('gameStart');
+            document.querySelector('#petuh-song').emit('gameStart');
             duration = 3000;
             score = 0;
             seekAnim.start();
+            this.timerBeforeShotgun();
+        },
+
+        getShotgun () {
+            if (shotgun) return;
+            this.getShotgun_ = new AFRAME.TWEEN.Tween(document.querySelector('#gun').getAttribute('position'))
+                .to({ y: -1.5 }, 1500)
+                .easing(AFRAME.TWEEN.Easing.Linear.None)
+                .onStart(function () {
+                    shotgun = true;
+                    document.querySelector('#reload-gun').components.sound.playSound();
+                })
+                .onUpdate(function () {
+                    document.querySelector('#gun').setAttribute('position', { y: this.y })
+                })
+                .onComplete(() => {
+                    this.startFire();
+                })
+                .start();
+        },
+
+        startFire () {
+            if (!shotgun) return;
+            var fire = true;
+            var iter;
+            new AFRAME.TWEEN.Tween({ z: 1 })
+                .to({ z: 0 }, 980)
+                .easing(AFRAME.TWEEN.Easing.Linear.None)
+                .onStart(function () {
+                    document.querySelector('#fire-from-gun').components.sound.playSound();
+                    document.querySelector('#gun-explosion').setAttribute('visible', true);
+                    setTimeout (function () {
+                        document.querySelector('#gun-explosion').setAttribute('visible', false);
+                    }, 200);
+                    iter = setInterval(function () {
+                        document.querySelector('#gun-explosion').setAttribute('visible', true);
+                        setTimeout (function () {
+                            document.querySelector('#gun-explosion').setAttribute('visible', false);
+                        }, 200);
+                    }, 980);
+                })
+                .onStop(function () {
+                    console.log(1);
+                })
+                .onUpdate(function () {
+                    document.querySelector('#gun').setAttribute('position', { z: this.z });
+                })
+                .onComplete(() => {
+                    window.clearInterval(iter);
+                    this.hideShotgun();
+                })
+                .repeat(5)
+                .start();
+        },
+
+        hideShotgun () {
+            if (!shotgun) return;
+            new AFRAME.TWEEN.Tween(document.querySelector('#gun').getAttribute('position'))
+                .to({ y: -10 }, 1500)
+                .easing(AFRAME.TWEEN.Easing.Linear.None)
+                .onStart(function () {
+                    duration += 1000;
+                    shotgun = false;
+                    document.querySelector('#fire-from-gun').components.sound.isPlaying = true;
+                    document.querySelector('#fire-from-gun').components.sound.pause();
+                })
+                .onUpdate(function () {
+                    document.querySelector('#gun').setAttribute('position', { y: this.y })
+                })
+                .onComplete(() => {
+                    if (isGameStart()) {
+                        this.timerBeforeShotgun();    
+                    }
+                })
+                .start();
         },
 
     	tick() {

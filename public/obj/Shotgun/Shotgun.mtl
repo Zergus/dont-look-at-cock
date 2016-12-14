@@ -1,0 +1,28 @@
+# Blender MTL File: ''
+# Material Count: 2
+newmtl 8925ff59.dds_8925ff59.tga.001_8925ff59.tga.001_8925ff59.tga.001
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.358400 0.358400 0.358400
+Ks 1.000000 1.000000 1.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Mauro.mauro-PC\Desktop\Nueva carpeta\Resident Evil 5 Sheva Kris\Texture\8925ff59.tga
+map_Bump C:\\Users\\Mauro.mauro-PC\\Desktop\\Nueva carpeta\\Resident Evil 5 Sheva Kris\\Texture\\439d1d15.tga
+map_Ks C:\\Users\\Mauro.mauro-PC\\Desktop\\Nueva carpeta\\Resident Evil 5 Sheva Kris\\Texture\\756d27ba.tga
+
+
+newmtl fcdf7ffc.dds_fcdf7ffc.tga.001_fcdf7ffc.tga.001_fcdf7ffc.tga.001
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.358400 0.358400 0.358400
+Ks 1.000000 1.000000 1.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\Mauro.mauro-PC\Desktop\Nueva carpeta\Resident Evil 5 Sheva Kris\Texture\fcdf7ffc.tga
+map_Bump C:\\Users\\Mauro.mauro-PC\\Desktop\\Nueva carpeta\\Resident Evil 5 Sheva Kris\\Texture\\bb11013f.tga
+map_Ks C:\\Users\\Mauro.mauro-PC\\Desktop\\Nueva carpeta\\Resident Evil 5 Sheva Kris\\Texture\\a4bcbce8.tga
+
+
