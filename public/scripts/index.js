@@ -192,7 +192,7 @@
         getShotgun () {
             if (shotgun) return;
             this.getShotgun_ = new AFRAME.TWEEN.Tween(document.querySelector('#gun').getAttribute('position'))
-                .to({ y: -1.5 }, 1500)
+                .to({ y: -1.5 }, 10000)
                 .easing(AFRAME.TWEEN.Easing.Linear.None)
                 .onStart(function () {
                     shotgun = true;
@@ -228,13 +228,13 @@
                     }, 980);
                 })
                 .onStop(function () {
-                    console.log(1);
+                    iter && window.clearInterval(iter);
                 })
                 .onUpdate(function () {
                     document.querySelector('#gun').setAttribute('position', { z: this.z });
                 })
                 .onComplete(() => {
-                    window.clearInterval(iter);
+                    iter && window.clearInterval(iter);
                     this.hideShotgun();
                 })
                 .repeat(5)
