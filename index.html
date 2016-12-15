@@ -32,6 +32,7 @@
 
       <a-entity id="menu-scene" position="0 0 -8" menu visible="true">
         <a-entity geometry="primitive: plane; width: 10; height: 10;" material="color: blue" random-blink="1000">
+          <!-- START BUTTON -->
           <a-entity id="start-game-button"
             mixin="button"
             position="0 2 1"
@@ -40,10 +41,11 @@
             draw="background: #D7E8FF" textwrap="textAlign: center; x: 128; y: 128; text: Start Game!">
           </a-entity>
           </a-entity>
-          <a-entity geometry="primitive: box; width: 7; height: 3; depth: 0.1" 
+          <!-- TIP MESSAGE -->
+          <a-entity geometry="primitive: box; width: 7; height: 3; depth: 0.1"
             position="0 -2 1"
-            draw="background: red" 
-            textwrap="textAlign: center; x: 128; y: 100; text: TIP: DONT LOOK AT COCK!"></a-entity>
+            draw="background: red"
+            textwrap="textAlign: center; x: 128; y: 100; text: TIP: DONT LOOK AT COCK! ...unless you have shotgun"></a-entity>
         </a-entity>
       </a-entity>
 
@@ -60,20 +62,28 @@
             <!-- PETUH SOUND -->
             <a-sound id="petuh-song" src="#game-mus" loop="true" on="gameStart"></a-sound>
             <!-- PETUH COLLIDER -->
-            <a-box width="0.5" height="0.5" depth="0.1" class="collidable" position="0 0 -0.1" transparent="true" hover petuh></a-box>
+            <a-box width="1.5" height="1.5" depth="1.5" class="collidable" position="0 0 -0.1" transparent="true" hover petuh></a-box>
           </a-entity>
         </a-entity>
       </a-entity>
 
       <!-- PLAYER LOOK -->
       <a-entity camera look-controls id="player">
+        <!-- MESSAGE -->
+        <a-entity id="player-message" geometry="primitive: box; width: 1; height: 0.5; depth: 0.001"
+            position="0 0.6 -1"
+            draw="background: #fff"
+            textwrap="textAlign: center; x: 128; y: 100; text: SCORE: 0"></a-entity>
         <!-- RAYCASTER -->
         <a-entity raycaster="objects: .collidable;" position="0 0 0"></a-entity>
         <!-- TARGET IMG -->
         <a-image src="#target-img" position="0 0 -3"></a-image>
+        <!-- SHOOT EXPLOSION IMG -->
         <a-image id="gun-explosion" src="#explosion" position="0 0 -3"></a-image>
-        <a-entity id="gun" obj-model="obj: #gunObj" material="color: #BCC6CC" scale="0.1, 0.1, 0.1" rotation="0 90 0" position="1.5 -10 1">
+        <a-entity id="gun" obj-model="obj: #gunObj" material="color: #BCC6CC" scale="0.05, 0.05, 0.05" rotation="0 90 0" position="1.5 -10 1">
+          <!-- FIRE SOUND -->
           <a-sound id="fire-from-gun" src="#fire-sound" loop="true"></a-sound>
+          <!-- RELOAD SOUND -->
           <a-sound id="reload-gun" volume="80" src="#reload-sound"></a-sound>
         </a-entity>
       </a-entity>

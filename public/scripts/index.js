@@ -62,13 +62,31 @@
     	init() {
             this.el.addEventListener('hover', this.onHover.bind(this));
             this.el.addEventListener('blur', this.onBlur.bind(this));
+            this.el.addEventListener('kill', () => {
+                this.killPetuh();
+            });
     	},
         onHover () {
             if (!isGameStart()) return;
-            updateGameStatus(GAME.status.stop);
+            if (!shotgun) {
+                updateGameStatus(GAME.status.stop);
+            } else {
+                this.killPetuh();
+            }
         },
         onBlur () {
             //
+        },
+        killPetuh () {
+            score += 1000;
+            seekAnim && AFRAME.TWEEN.remove(seekAnim);
+            var coords = document.querySelector('#player').getAttribute('rotation');
+            document.querySelector('[camera-seeker]').setAttribute('rotation', {
+                x: chance.floating({min: coords.x - 360, max: coords.x + 360}),
+                y: chance.floating({min: coords.y - 360, max: coords.y + 360}),
+                z: chance.floating({min: coords.z - 360, max: coords.z + 360})
+            });
+            document.querySelector('[camera-seeker]').emit('killed');
         }
     });
 
@@ -77,6 +95,9 @@
             this.CAMERA = document.querySelector('#player');
             this.newCords = {};
             this.setupAnimation();
+            this.el.addEventListener('killed', () => {
+                this.setupAnimation().start();
+            });
     	},
 
         setupAnimation () {
@@ -90,7 +111,7 @@
                 })
                 .onComplete(() => {
                     if (!shotgun && duration > 300) duration -= 100;
-                    if (shotgun) duration = 300;
+                    if (shotgun) duration = 2000;
                     this.setupAnimation().start();
                 });
         },
@@ -129,6 +150,7 @@
     			this.onGameStatusUpdate(detail.status);
     		});
             document.querySelector('#gun-explosion').setAttribute('visible', false);
+            document.querySelector('#player-message').setAttribute('visible', false);
 
     	},
 
@@ -160,10 +182,10 @@
             }, time);
         },
 
-        timerBeforeShotgun (time = 10000) {
+        timerBeforeShotgun (time = 1000) {
             this.gunTimer = setTimeout(() => {
                 this.getShotgun();
-            }, time); 
+            }, time);
         },
 
         stopGameStart () {
@@ -183,6 +205,7 @@
         startGame () {
             toggleMenu();
             document.querySelector('#petuh-song').emit('gameStart');
+            document.querySelector('#player-message').setAttribute('visible', true);
             duration = 3000;
             score = 0;
             seekAnim.start();
@@ -192,7 +215,7 @@
         getShotgun () {
             if (shotgun) return;
             this.getShotgun_ = new AFRAME.TWEEN.Tween(document.querySelector('#gun').getAttribute('position'))
-                .to({ y: -1.5 }, 10000)
+                .to({ y: -1.5 }, 1500)
                 .easing(AFRAME.TWEEN.Easing.Linear.None)
                 .onStart(function () {
                     shotgun = true;
@@ -233,11 +256,7 @@
                 .onUpdate(function () {
                     document.querySelector('#gun').setAttribute('position', { z: this.z });
                 })
-                .onComplete(() => {
-                    iter && window.clearInterval(iter);
-                    this.hideShotgun();
-                })
-                .repeat(5)
+                .repeat(Infinity)
                 .start();
         },
 
@@ -257,14 +276,17 @@
                 })
                 .onComplete(() => {
                     if (isGameStart()) {
-                        this.timerBeforeShotgun();    
+                        this.timerBeforeShotgun();
                     }
                 })
                 .start();
         },
 
     	tick() {
-            //
+            if (isGameStart()) {
+                score += 1;
+                document.querySelector('#player-message').setAttribute('textwrap', { text: `SCORE: ${score}` })
+            }
     	}
     });
 
