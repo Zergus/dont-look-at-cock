@@ -182,7 +182,7 @@
             }, time);
         },
 
-        timerBeforeShotgun (time = 1000) {
+        timerBeforeShotgun (time = 15000) {
             this.gunTimer = setTimeout(() => {
                 this.getShotgun();
             }, time);
@@ -253,10 +253,14 @@
                 .onStop(function () {
                     iter && window.clearInterval(iter);
                 })
+                .onComplete(() => {
+                    window.clearInterval(iter);
+                    this.hideShotgun();
+                })
                 .onUpdate(function () {
                     document.querySelector('#gun').setAttribute('position', { z: this.z });
                 })
-                .repeat(Infinity)
+                .repeat(5)
                 .start();
         },
 
@@ -276,7 +280,7 @@
                 })
                 .onComplete(() => {
                     if (isGameStart()) {
-                        this.timerBeforeShotgun();
+                        this.timerBeforeShotgun(1000);
                     }
                 })
                 .start();
